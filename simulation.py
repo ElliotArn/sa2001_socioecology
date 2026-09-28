@@ -56,7 +56,7 @@ def alt_fk_q(k_q, a_f):
 
 
 # System
-def test():
+def test(title=""):
     def vfunc(t, k):
         k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
         return np.array([fk_a(k_a, k_p, k_w, k_q), fk_p(k_p, k_a), fk_w(k_w), fk_q(k_q, fk_p(k_p, k_a))])
@@ -70,27 +70,36 @@ def test():
 
     k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
     time = result.t
-    plt.plot(time, k_a, color="green")
-    plt.plot(time, k_p, color="yellow")
-    plt.plot(time, k_w, color="blue")
-    plt.plot(time, k_q, color="brown")
+    make_plot(time, k_a, k_p, k_w, k_q, title)
+
+def make_plot(time, k_a, k_p, k_w, k_q, title=""):
+    plt.plot(time, k_a, label='Assets')
+    plt.plot(time, k_p, label='Phosphorous')
+    plt.plot(time, k_w, label='Water')
+    plt.plot(time, k_q, label='Soil quality')
+    plt.xlabel('time')
+    plt.legend()
+    plt.title(title)
     plt.show()
 
+
+# baseline
+test("Baseline")
 
 # lägga till fosfor från staten
 amount_p = 0.5
 fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 
-test()
+test("Add phosphorous")
 
 
 # lägga till vatten från staten
 fk_p = lambda k_p, k_a : -d_p*k_p
 amount_w = 1
 fk_w = lambda k_r :r_w- d_w*k_r + amount_w
-test()
+test("Add water")
 
 
 # lägga till vatten och fosfor från staten
 fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
-test()
+test("Add water and phosphorous")
