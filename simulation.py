@@ -23,6 +23,8 @@ p_p = 0.01
 
 # Derivative functions
 
+# - General/help functions -
+
 def s(k_a):
     s1 = 0.1
     s2 = 1
@@ -37,11 +39,22 @@ def f(k_a, k_p, k_w, k_q):
     alpha_q = 0.2
     return A * k_a**alpha_a * k_p**alpha_p * k_w**alpha_w * k_q**alpha_q
 
+def I_p(k_a, c1=1.0, c2=5.0):
+    # c1, c2 > 0
+    return c1*k_a**2 / (c2 + k_a**2)
+
+def I_q(k_a, c3=1.0, c4=1.8):
+    # c3, c4 > 0
+    return c3*k_a / (c4+k_a)
+
+
+# - Baseline functions -
+
 def fk_a_baseline(k_a, k_p, k_w, k_q):
     return s(k_a)*f(k_a, k_p, k_w, k_q) - (d_a+r)*k_a
 
 def fk_p_baseline(k_p, k_a):
-    return -d_p*k_p + p_p * k_a
+    return -d_p*k_p #+ p_p * k_a
 
 def fk_w_baseline(k_w):
     return r_w - d_w*k_w
@@ -49,11 +62,22 @@ def fk_w_baseline(k_w):
 def fk_q_baseline(k_q, a_f):
     return r_q*k_q*(1-k_q/Q)
 
+
+# - Alternative functions -
+
 def fk_q_alt(k_q, a_f):
     if k_q < r_q_min:
         return 0
     return r_q*k_q*(1-k_q/Q) - max(a_f, 0)
 
+def fk_p_agrochem(k_a, k_p):
+    return I_p(k_a)-d_p*k_p
+
+def fk_q_agrochem(k_a, k_q):
+    return r_q*k_q*(1-k_q/Q)-I_q(k_a)*k_q
+
+
+# ---
 
 # System
 def test(fk_a=fk_a_baseline, fk_p=fk_p_baseline, fk_w=fk_w_baseline, fk_q=fk_q_baseline, title=""):
@@ -86,6 +110,10 @@ def make_plot(time, k_a, k_p, k_w, k_q, title=""):
 # baseline
 test(title="Baseline")
 
+test(fk_p=fk_p_agrochem, fk_q=fk_q_agrochem, title="Inputs of agrochemicals")
+
+
+"""
 # lägga till fosfor från staten
 amount_p = 0.5
 fk_p_alt = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
@@ -94,12 +122,11 @@ test(fk_p=fk_p_alt, title="Add phosphorous")
 
 
 # lägga till vatten från staten
-#fk_p = lambda k_p, k_a : -d_p*k_p
 amount_w = 1
 fk_w_alt = lambda k_r :r_w- d_w*k_r + amount_w
 test(fk_w=fk_w_alt, title="Add water")
 
 
 # lägga till vatten och fosfor från staten
-fk_p_alt = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 test(fk_p=fk_p_alt, fk_w=fk_w_alt, title="Add water and phosphorous")
+"""
