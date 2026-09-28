@@ -37,26 +37,26 @@ def f(k_a, k_p, k_w, k_q):
     alpha_q = 0.2
     return A * k_a**alpha_a * k_p**alpha_p * k_w**alpha_w * k_q**alpha_q
 
-def fk_a(k_a, k_p, k_w, k_q):
+def fk_a_baseline(k_a, k_p, k_w, k_q):
     return s(k_a)*f(k_a, k_p, k_w, k_q) - (d_a+r)*k_a
 
-def fk_p(k_p, k_a):
+def fk_p_baseline(k_p, k_a):
     return -d_p*k_p + p_p * k_a
 
-def fk_w(k_w):
+def fk_w_baseline(k_w):
     return r_w - d_w*k_w
 
-def fk_q(k_q, a_f):
+def fk_q_baseline(k_q, a_f):
     return r_q*k_q*(1-k_q/Q)
 
-def alt_fk_q(k_q, a_f):
+def fk_q_alt(k_q, a_f):
     if k_q < r_q_min:
         return 0
     return r_q*k_q*(1-k_q/Q) - max(a_f, 0)
 
 
 # System
-def test(title=""):
+def test(fk_a=fk_a_baseline, fk_p=fk_p_baseline, fk_w=fk_w_baseline, fk_q=fk_q_baseline, title=""):
     def vfunc(t, k):
         k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
         return np.array([fk_a(k_a, k_p, k_w, k_q), fk_p(k_p, k_a), fk_w(k_w), fk_q(k_q, fk_p(k_p, k_a))])
@@ -84,22 +84,22 @@ def make_plot(time, k_a, k_p, k_w, k_q, title=""):
 
 
 # baseline
-test("Baseline")
+test(title="Baseline")
 
 # lägga till fosfor från staten
 amount_p = 0.5
-fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
+fk_p_alt = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 
-test("Add phosphorous")
+test(fk_p=fk_p_alt, title="Add phosphorous")
 
 
 # lägga till vatten från staten
-fk_p = lambda k_p, k_a : -d_p*k_p
+#fk_p = lambda k_p, k_a : -d_p*k_p
 amount_w = 1
-fk_w = lambda k_r :r_w- d_w*k_r + amount_w
-test("Add water")
+fk_w_alt = lambda k_r :r_w- d_w*k_r + amount_w
+test(fk_w=fk_w_alt, title="Add water")
 
 
 # lägga till vatten och fosfor från staten
-fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
-test("Add water and phosphorous")
+fk_p_alt = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
+test(fk_p=fk_p_alt, fk_w=fk_w_alt, title="Add water and phosphorous")
