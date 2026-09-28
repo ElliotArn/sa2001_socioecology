@@ -49,7 +49,6 @@ def fk_w(k_w):
 def fk_q(k_q, a_f):
     if k_q < r_q_min:
         return 0
-    print(max(a_f, 0))
     return r_q*k_q*(1-k_q/Q) - max(a_f, 0)
 
 
@@ -76,17 +75,17 @@ def test():
 
 
 # subsidise phosfor
-amount = 0.2
-fk_p = lambda k_p, k_a : -d_p*k_p + amount + p_p * k_a
+amount_p = 0.5
+fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 
 test()
 
 
 fk_p = lambda k_p, k_a : -d_p*k_p
-
-fk_w = lambda k_r :r_w- d_w*k_r + amount
+amount_w = 1
+fk_w = lambda k_r :r_w- d_w*k_r + amount_w
 test()
 
 
-fk_p = lambda k_p, k_a : -d_p*k_p + amount + p_p * k_a
+fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 test()
