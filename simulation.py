@@ -47,6 +47,9 @@ def fk_w(k_w):
     return r_w - d_w*k_w
 
 def fk_q(k_q, a_f):
+    return r_q*k_q*(1-k_q/Q)
+
+def alt_fk_q(k_q, a_f):
     if k_q < r_q_min:
         return 0
     return r_q*k_q*(1-k_q/Q) - max(a_f, 0)
@@ -74,18 +77,20 @@ def test():
     plt.show()
 
 
-# subsidise phosfor
+# lägga till fosfor från staten
 amount_p = 0.5
 fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 
 test()
 
 
+# lägga till vatten från staten
 fk_p = lambda k_p, k_a : -d_p*k_p
 amount_w = 1
 fk_w = lambda k_r :r_w- d_w*k_r + amount_w
 test()
 
 
+# lägga till vatten och fosfor från staten
 fk_p = lambda k_p, k_a : -d_p*k_p + amount_p + p_p * k_a
 test()
