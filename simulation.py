@@ -3,19 +3,21 @@ import scipy
 import matplotlib.pyplot as plt
 
 # Parameters
-k_a0 = 0.7
+k_a0 = 3.7
 k_p0 = 1.2
-k_q0 = 4
+k_q0 = 2
 k_w0 = 0.2
 d_a = 0.5
 d_p = 0.2
 d_w = 1
-r = 1
+r = 0.2
 r_q = 1
+r_q_min = 0.1
 r_w = 1
-Q = 1
+Q = 2
 t0 = 0
-t_max = 1
+t_max = 39
+p_p = 0.01
 
 
 
@@ -38,31 +40,53 @@ def f(k_a, k_p, k_w, k_q):
 def fk_a(k_a, k_p, k_w, k_q):
     return s(k_a)*f(k_a, k_p, k_w, k_q) - (d_a+r)*k_a
 
-def fk_p(k_p):
-    return -d_w*k_p
+def fk_p(k_p, k_a):
+    return -d_p*k_p + p_p * k_a
 
 def fk_w(k_w):
     return r_w - d_w*k_w
 
-def fk_q(k_q):
-    return r_q*k_q*(1-k_q/Q)
+def fk_q(k_q, a_f):
+    if k_q < r_q_min:
+        return 0
+    print(max(a_f, 0))
+    return r_q*k_q*(1-k_q/Q) - max(a_f, 0)
 
 
 # System
+def test():
+    def vfunc(t, k):
+        k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
+        return np.array([fk_a(k_a, k_p, k_w, k_q), fk_p(k_p, k_a), fk_w(k_w), fk_q(k_q, fk_p(k_p, k_a))])
 
-def vfunc(t, k):
+    k0 = np.array([k_a0, k_p0, k_w0, k_q0])
+    t_span = [t0, t_max]
+
+    result = scipy.integrate.solve_ivp(vfunc, t_span, k0, max_step=0.1)
+
+    k = result.y
+
     k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
-    return np.array([fk_a(k_a, k_p, k_w, k_q), fk_p(k_p), fk_w(k_w), fk_q(k_q)])
+    time = result.t
+    plt.plot(time, k_a, color="green")
+    plt.plot(time, k_p, color="yellow")
+    plt.plot(time, k_w, color="blue")
+    plt.plot(time, k_q, color="brown")
+    plt.show()
 
-k0 = np.array([k_a0, k_p0, k_w0, k_q0])
-t_span = [t0, t_max]
 
-result = scipy.integrate.solve_ivp(vfunc, t_span, k0, max_step=0.1)
+# subsidise phosfor
+amount = 0.2
+fk_p = lambda k_p, k_a : -d_p*k_p + amount + p_p * k_a
 
-k = result.y
+test()
 
-k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
-time = result.t
 
-plt.plot(time, k_a)
-plt.show()
+fk_p = lambda k_p, k_a : -d_p*k_p
+
+fk_w = lambda k_r :r_w- d_w*k_r + amount
+test()
+
+
+fk_p = lambda k_p, k_a : -d_p*k_p + amount + p_p * k_a
+test()
