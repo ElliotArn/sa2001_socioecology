@@ -20,7 +20,7 @@ t_max = 39
 p_p = 0.01
 
 
-class Figure2:
+class Baseline:
 
     def __init__(self):
         self.s1 = 0.1
@@ -33,6 +33,7 @@ class Figure2:
         self.d_a = 1.0
         self.r_w = 1.5
         self.d_w = 0.5    
+
 
 class Agrochemicals:
     # We assume good water conditions
@@ -61,6 +62,7 @@ class Agrochemicals:
 
     def get_params(self):
         return self.s1, self.s2, self.s3, self.A, self.alpha_a, self.alpha_p, self.alpha_q, self.d_a, self.c1, self.c2, self.c3, self.c4, self.d_p, self.r_q, self.Q
+
 
 # Derivative functions
 
