@@ -11,7 +11,7 @@ k_w0 = 0.2
 t0 = 0
 
 # Other constants not varied between scenarios
-t_max = 39
+t_max = 10
 r = 0.2
 
 
@@ -46,6 +46,7 @@ def run(scenario, title=""):
     time = result.t
     make_plot(time, k_a, k_p, k_w, k_q, title)
 
+
 # Classes
 
 class Baseline:
@@ -78,13 +79,65 @@ class Baseline:
     def fk_q(self, k_a, k_p, k_w, k_q):
         return 0
 
+class Agrochemicals:
+    # We assume good water conditions
+
+    def __init__(self, strong):
+        self.s1 = 0.25
+        self.s2 = 2.5
+        self.s3 = 20
+        self.A = 10
+        self.alpha_a = 0.4
+        self.alpha_p = 0.3
+        self.alpha_q = 0.2
+        self.d_a = 0.7
+        self.c1 = 1
+        self.c2 = 20
+
+        if strong:
+            self.c3 = 4 # strong negative effect on soil quality
+        else:
+            self.c3 = 1 # mild negative effect on soil quality
+
+        self.c4 = 4
+        self.d_p = 0.2
+        self.r_q = 1
+        self.Q = 10
+
+    def I_p(self, k_a):
+        return self.c1*k_a**2/(self.c2+k_a**2)
+
+    def I_q(self, k_a):
+        return self.c3*k_a/(self.c4+k_a)
+
+    def f(self, k_a, k_p, k_w, k_q):
+        return self.A * k_a**self.alpha_a * k_p**self.alpha_p * k_q**self.alpha_q
+
+    def fk_a(self, k_a, k_p, k_w, k_q):
+        return s(k_a, self.s1, self.s2, self.s3)*self.f(k_a, k_p, k_w, k_q) - (self.d_a+r)*k_a
+
+    def fk_p(self, k_a, k_p, k_w, k_q):
+        return self.I_p(k_a) - self.d_p*k_p
+
+    def fk_w(self, k_a, k_p, k_w, k_q):
+        return 0
+
+    def fk_q(self, k_a, k_p, k_w, k_q):
+        return self.r_q*k_q*(1-k_q/self.Q)-self.I_q(k_a)*k_q
 
 
 # - Main -
 
-# Baseline scenario
+# Scenario 0: Baseline
 baseline = Baseline()
-run(scenario=baseline, title="Baseline scenario")
+run(scenario=baseline, title="Scenario: Baseline")
 
+# Scenario 1: Input of agrochemicals
+# - 1a: Mild negative effect of agrochemicals on soil quality
+mild_agro = Agrochemicals(False)
+run(scenario=mild_agro, title="Scenario: Agrochemicals, mild")
+# - 1b: Strong negative effect of agrochemicals on soil quality
+strong_agro = Agrochemicals(True)
+run(scenario=strong_agro, title="Scenario: Agrochemicals, strong")
 
 print("Done")
