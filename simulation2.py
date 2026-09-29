@@ -80,6 +80,7 @@ class Baseline:
         return 0
 
 class Agrochemicals:
+    # Scenario 1
     # We assume good water conditions
 
     def __init__(self, strong):
@@ -104,6 +105,10 @@ class Agrochemicals:
         self.r_q = 1
         self.Q = 10
 
+        # From baseline scenario:
+        self.r_w = 1.5
+        self.d_w = 0.5
+
     def I_p(self, k_a):
         return self.c1*k_a**2/(self.c2+k_a**2)
 
@@ -120,11 +125,65 @@ class Agrochemicals:
         return self.I_p(k_a) - self.d_p*k_p
 
     def fk_w(self, k_a, k_p, k_w, k_q):
-        return 0
+        # From baseline scenario
+        return self.r_w - self.d_w*k_w
 
     def fk_q(self, k_a, k_p, k_w, k_q):
         return self.r_q*k_q*(1-k_q/self.Q)-self.I_q(k_a)*k_q
 
+class Energy:
+    # Scenario 2
+    # We assume good water conditions
+
+    def __init__(self, sufficient):
+        self.s1 = 0.1
+        self.s2 = 1
+        self.s3 = 0
+        self.A = 10
+        self.alpha_a = 0.3
+        self.alpha_p = 0.3
+        self.alpha_w = 0.2 # it says alpha_q in the article but I think they meant to write alpha_w
+        self.d_a = 0.5
+
+        if sufficient:
+            self.c1 = 1 # sufficient amount of nutrient rich manure
+        else:
+            self.c1 = 0.5 # insufficient amount or nutrient poor manure
+
+        self.c2 = 5
+        self.c3 = 1
+        self.c4 = 1.8
+        self.d_p = 0.2
+        self.r_w = 1
+        self.c5 = 1
+        self.c6 = 40
+        self.d_w = 1
+
+        # From baseline scenario:
+        self.d_p = 1
+
+    def I_p(self, k_a, k_p):
+        return self.c1*k_a**2/(self.c2+k_a**2) * self.c3*k_p/(self.c4+k_p)
+
+    def I_w(self, k_a):
+        return self.c5*k_a**2/(self.c6+k_a**2)
+
+    def f(self, k_a, k_p, k_w, k_q):
+        return self.A * k_a**self.alpha_a * k_p**self.alpha_p * k_w**self.alpha_w
+
+    def fk_a(self, k_a, k_p, k_w, k_q):
+        return s(k_a, self.s1, self.s2, self.s3)*self.f(k_a, k_p, k_w, k_q) - (self.d_a+r)*k_a
+
+    def fk_p(self, k_a, k_p, k_w, k_q):
+        return self.I_p(k_a, k_p) - self.d_p*k_p
+    
+    def fk_w(self, k_a, k_p, k_w, k_q):
+        return self.r_w + self.I_w(k_a)*k_w - self.d_w*k_w
+    
+    def fk_q(self, k_a, k_p, k_w, k_q):
+        # From baseline scenario:
+        return -self.d_p*k_p
+    
 
 # - Main -
 
@@ -139,5 +198,13 @@ run(scenario=mild_agro, title="Scenario: Agrochemicals, mild")
 # - 1b: Strong negative effect of agrochemicals on soil quality
 strong_agro = Agrochemicals(True)
 run(scenario=strong_agro, title="Scenario: Agrochemicals, strong")
+
+# Scenario 2: Diversification of household energy sources
+# - 2a: Sufficient amount of nutrient rich manure
+energy_sufficient = Energy(True)
+run(scenario=energy_sufficient, title="Scenario: Energy, sufficient")
+# - 2b: Strong negative effect of agrochemicals on soil quality
+energy_insufficient = Energy(False)
+run(scenario=energy_insufficient, title="Scenario: Energy, insufficient")
 
 print("Done")
