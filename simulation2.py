@@ -2,30 +2,15 @@ import numpy as np
 import scipy
 import matplotlib.pyplot as plt
 
-class TestClass:
 
-    def __init__(self):
-        pass
-
-    def test_method(self):
-        print(1)
-
-
-def test_func(fun):
-    fun()
-
-test_class = TestClass()
-#test_func(test_class.test_method)
-
-
-# Initial values
+# Initial values (not varied between scenarios)
 k_a0 = 3.7
 k_p0 = 1.2
 k_q0 = 2
 k_w0 = 0.2
 t0 = 0
 
-# Constants not varied between scenarios
+# Other constants not varied between scenarios
 t_max = 39
 r = 0.2
 
@@ -44,6 +29,24 @@ def make_plot(time, k_a, k_p, k_w, k_q, title=""):
     plt.legend()
     plt.title(title)
     plt.show()
+
+def run(scenario, title=""):
+    def vfunc(t, k):
+        k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
+        return np.array([scenario.fk_a(k_a, k_p, k_w, k_q), scenario.fk_p(k_a, k_p, k_w, k_q), scenario.fk_w(k_a, k_p, k_w, k_q), scenario.fk_q(k_a, k_p, k_w, k_q)])
+
+    k0 = np.array([k_a0, k_p0, k_w0, k_q0])
+    t_span = [t0, t_max]
+
+    result = scipy.integrate.solve_ivp(vfunc, t_span, k0, max_step=0.1)
+
+    k = result.y
+
+    k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
+    time = result.t
+    make_plot(time, k_a, k_p, k_w, k_q, title)
+
+# Classes
 
 class Baseline:
 
@@ -76,24 +79,12 @@ class Baseline:
         return 0
 
 
-def run(scenario, title=""):
-    def vfunc(t, k):
-        k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
-        return np.array([scenario.fk_a(k_a, k_p, k_w, k_q), scenario.fk_p(k_a, k_p, k_w, k_q), scenario.fk_w(k_a, k_p, k_w, k_q), scenario.fk_q(k_a, k_p, k_w, k_q)])
 
-    k0 = np.array([k_a0, k_p0, k_w0, k_q0])
-    t_span = [t0, t_max]
+# - Main -
 
-    result = scipy.integrate.solve_ivp(vfunc, t_span, k0, max_step=0.1)
-
-    k = result.y
-
-    k_a, k_p, k_w, k_q = k[0], k[1], k[2], k[3]
-    time = result.t
-    make_plot(time, k_a, k_p, k_w, k_q, title)
-
-
-
+# Baseline scenario
 baseline = Baseline()
 run(scenario=baseline, title="Baseline scenario")
+
+
 print("Done")
