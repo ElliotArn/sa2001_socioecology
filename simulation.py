@@ -11,7 +11,7 @@ k_w0 = 1.5 # 2.8 # 1.5
 t0 = 0
 
 # Other constants not varied between scenarios
-t_max = 10
+t_max = 5
 r = 0.2
 
 
