@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 k_a0 = 3.9 # 10
 k_p0 = 8.5 # 1.2
 k_q0 = 3.7 # 0.9
-k_w0 = 2.8 # 1.5
+k_w0 = 1.5 # 2.8 # 1.5
 t0 = 0
 
 # Other constants not varied between scenarios
-t_max = 3
+t_max = 10
 r = 0.2
 
 
@@ -132,7 +132,7 @@ class Energy:
     # We assume good water conditions
     # Because of diverse energy sources, manure can be used as fertiliser instead of fuel
 
-    def __init__(self, sufficient):
+    def __init__(self, sufficient=True, goodwater=True):
         self.s1 = 0.1
         self.s2 = 1
         self.s3 = 0
@@ -151,7 +151,12 @@ class Energy:
         self.c3 = 1
         self.c4 = 1.8
         self.d_p = 0.2
-        self.r_w = 1
+
+        if goodwater:
+            self.r_w = 5 # 1 # good water conditions # if it is 10 and poor water conditions is 0.1, then we see clear difference, though not in convergence
+        else:
+            self.r_w = 0.01 # 0.5 # poor water conditions
+
         self.c5 = 1
         self.c6 = 40
         self.d_w = 1
@@ -214,6 +219,7 @@ class Tillage:
 
 # - Main -
 
+"""
 # Scenario 0: Baseline
 baseline = Baseline()
 run(scenario=baseline, title="Scenario: Baseline")
@@ -228,15 +234,25 @@ run(scenario=strong_agro, title="Scenario: Agrochemicals, strong")
 
 # Scenario 2: Diversification of household energy sources
 # - 2a: Sufficient amount of nutrient rich manure
-energy_sufficient = Energy(True)
+energy_sufficient = Energy(sufficient=True)
 run(scenario=energy_sufficient, title="Scenario: Energy, sufficient")
 # - 2b: Strong negative effect of agrochemicals on soil quality
-energy_insufficient = Energy(False)
+energy_insufficient = Energy(sufficient=False)
 run(scenario=energy_insufficient, title="Scenario: Energy, insufficient")
 
 # Scenario 3: Conservation tillage
 tillage = Tillage()
 run(scenario=tillage, title="Scenario: Tillage")
+"""
+
+# Diversification of household energy sources, with good and poor water conditions
+# Assume that the manure is sufficient
+energy_gw = Energy(sufficient=True, goodwater=True)
+run(scenario=energy_gw, title="Scenario: Energy, good water conditions")
+energy_pw = Energy(sufficient=True, goodwater=False)
+run(scenario=energy_pw, title="Scenario: Energy, poor water conditions")
+
+
 
 print("Done")
 
