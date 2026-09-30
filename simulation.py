@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 
 
 # Initial values (not varied between scenarios)
-k_a0 = 10
-k_p0 = 1.2
-k_q0 = 0.9
-k_w0 = 1.5
+k_a0 = 3.9 # 10
+k_p0 = 8.5 # 1.2
+k_q0 = 3.7 # 0.9
+k_w0 = 2.8 # 1.5
 t0 = 0
 
 # Other constants not varied between scenarios
-t_max = 10
+t_max = 3
 r = 0.2
 
 
